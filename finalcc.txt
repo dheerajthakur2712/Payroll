@@ -1,0 +1,1113 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<conio.h>
+
+#define ETF_RATE 0.03
+#define GEN_TIME (8 * 20)
+#define EMP_FILE "empdata.txt"
+#define TMP_FILE "tmpdata.txt"
+#define SAL_FILE "salary.txt"
+#define USER_FILE "user.txt"
+#define TMP1_FILE "tmpdata1.txt"
+#define ADM "admin"
+#define PWD "admin"
+
+
+void welcome_msg(void);
+int user_check();
+int useremp_check();
+void exit_message(void);
+void maskPassword(char password[]);
+void manage_employee(void);
+void emp_menu(void);
+void add_employee(void);
+void delete_employee(void);
+void edit_employee(void);
+void search_employee(void);
+void add_user(void);
+void display(void);
+void print_report(void);
+int useremp_check();
+void print_slipemp(void);
+
+
+void welcome_msg(void)
+{
+        system("cls");
+        printf("\t\t\t\t\t\tWELCOME\n");
+        printf("\t\t\t\t-------------------------------------\n\n");
+        printf("\t\t\t\t      PAYROLL MANAGEMENT SYSTEM\n");
+        printf("\t\t\t\t-------------------------------------\n\n");
+        printf("\t\t\t\t\t1. Administrator Login \n");
+        printf("\n\t\t\t\t\t2. Employee Login \n\n\n");
+        printf("\nEnter your choice :  ");
+}
+
+int user_check()
+{
+         char username[10],password[10];
+         int isExit=0;
+         int flag=0;
+         char reply;
+         do
+         {
+     again : system("cls");
+             printf("\nUSERNAME >> ");
+             scanf("%s",username);
+             printf("\nPASSWORD >> ");
+             maskPassword(password);
+             if(strcmp(username,ADM) !=0 || strcmp(password,PWD) !=0)
+             {
+      validity : printf("\nUsername or Password is not valid");
+                 sleep(1);
+           ask : printf("\n\n\nTo go back enter 'Y' else enter 'N':");
+                 reply = getche();
+                 if(reply == 'Y' || reply == 'y')
+                 {
+                      flag=1;
+                      isExit=1;
+                 }
+                 else if(reply == 'N' || reply == 'n')
+                 {
+                     goto again;
+                 }
+                 else
+                 {
+                    printf("\nEnter Y or N !!!!");
+                    sleep(1);
+                    system("cls");
+                    goto ask;
+                 }
+              }
+              else
+              {
+                   isExit=1;
+              }
+         }while(isExit==0);
+         if(flag==1)
+         {
+             return 1;
+         }
+}
+
+void maskPassword(char password[30])
+{
+        char ch;
+        int i=0;
+        while((ch =_getch())!=13)
+        {
+                printf("*");
+                password[i]=ch;
+                i++;
+        }
+        password[i]='\0';
+}
+
+
+void main_menu(void)
+{
+        system("cls");
+        printf("\t\t\t\t _______________________________________________");
+        printf("\n\t\t\t\t|\t\t      MENU                     |");
+        printf("\n\t\t\t\t|______________________________________________|");
+        printf("\n\t\t\t\t| [1] MANAGE EMPLOYEES                         |");
+        printf("\n\t\t\t\t|______________________________________________|");
+        printf("\n\t\t\t\t| [2] PRINT REPORT                             |");
+        printf("\n\t\t\t\t|______________________________________________|");
+        printf("\n\t\t\t\t| [3] PRINT SLIP                               |");
+        printf("\n\t\t\t\t|______________________________________________|");
+        printf("\n\t\t\t\t| [4] ADD USER / DELETE USER                   |");
+        printf("\n\t\t\t\t|______________________________________________|");
+        printf("\n\t\t\t\t| [5] EXIT                                     |");
+        printf("\n\t\t\t\t|______________________________________________|\n");
+        printf("\nPLEASE CHOOSE A NUMBER IN THE BOX ABOVE >>> ");
+        sleep(1);
+}
+
+void manage_employee(void)
+{
+	int menuOpt;
+	int isExit = 0;
+	do
+	{
+		emp_menu();
+		fflush(stdin);
+		menuOpt = getche();
+		switch(menuOpt)
+		{
+			case '1':
+			{
+				add_employee();
+				break;
+			}
+			case '2':
+			{
+				delete_employee();
+				break;
+			}
+			case '3':
+			{
+				edit_employee();
+				break;
+			}
+			case '4':
+			{
+				search_employee();
+				break;
+			}
+			case '5':
+			{
+				display();
+				break;
+			}
+			case '6':
+			{
+				isExit = 1;
+				fflush(stdin);
+				break;
+			}
+			default:
+			{
+				system("cls");
+				printf("Invalid Option!");
+				sleep(2);
+			}
+		}
+	}while(isExit == 0);
+}
+
+void emp_menu(void)
+{
+	system("cls");
+	printf("\t\t\t\t\t MENU\n");
+	printf("\t\t\t\t---------------------\n");
+	printf("\t\t\t\t[1] : Add Employee\n");
+	printf("\t\t\t\t[2] : Delete Employee\n");
+	printf("\t\t\t\t[3] : Edit Employee\n");
+	printf("\t\t\t\t[4] : Search Employee\n");
+	printf("\t\t\t\t[5] : Display Employee\n");
+	printf("\t\t\t\t[6] : Go Back\n\n");
+	printf("Choose a number from above >>> ");
+	sleep(1);
+}
+
+void add_employee(void)
+{
+	char name[50];
+	char address[100];
+	char dept[15];
+	char phone[12];
+	char id[10],Id[10];
+	float salary;
+	float hours,leave;
+	char ch[300];
+	int flag=0;
+
+	FILE *fp;
+    fp = fopen(EMP_FILE, "r");
+    if(fp == NULL)
+    {
+        printf("\nError to open the file\n");
+        exit (1);
+    }
+    system("cls");
+    printf("ID: ");
+    fflush(stdin);
+    gets(Id);
+
+    do
+    {
+        fscanf(fp,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%f%f",id, name, address, dept, phone, &salary, &hours, &leave);
+        fgets(ch,"%[^\n]",fp);
+        if(strcmp(Id,id) == 0)
+        {
+            flag=1;
+        }
+    }while(!(feof(fp)));
+    fclose(fp);
+
+    if(flag==0)
+    {
+
+	FILE *fp;
+	fp = fopen(EMP_FILE, "a+");
+
+	strcpy(id,Id);
+
+	printf("Name: ");
+	fflush(stdin);
+	gets(name);
+
+	printf("Address: ");
+	fflush(stdin);
+	gets(address);
+
+	printf("Department: ");
+	fflush(stdin);
+	gets(dept);
+
+	printf("Phone: ");
+	fflush(stdin);
+    gets(phone);
+
+    printf("Salary: ");
+	fflush(stdin);
+	scanf("%f",&salary);
+
+	printf("Hours: ");
+	fflush(stdin);
+	scanf("%f",&hours);
+
+	printf("Leaves taken: ");
+	fflush(stdin);
+	scanf("%f",&leave);
+
+	fprintf(fp, "%s/%s/%s/%s/%s/ %.2f/ %.2f /%.2f\n", id, name, address, dept, phone, salary, hours, leave);
+	fflush(fp);
+	fclose(fp);
+	system("cls");
+	printf("New records are entered successfully");
+	sleep(2);
+    }
+    if(flag==1)
+    {
+        printf("Id exists!!");
+        sleep(1);
+    }
+}
+
+void delete_employee(void)
+{
+	char name[50];
+	char address[100];
+	char dept[15];
+	char phone[12];
+	char id[5];
+	char idDel[5];
+	float salary;
+	float hours,leave;
+	int flag = 0;
+	char ch[300];
+
+	FILE *fp1;
+	FILE *fp2;
+	fp1 = fopen(EMP_FILE, "r");
+	fp2 = fopen(TMP_FILE, "w");
+	system("cls");
+	printf("Enter Employee ID to Delete : ");
+	fflush(stdin);
+	gets(idDel);
+	do
+	{
+		fscanf(fp1,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%f%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch, "%[^\n]",fp1);
+		if(feof(fp1))
+		{
+			break;
+		}
+		if((strcmp(id, idDel)) != 0)
+		{
+			fprintf(fp2, "%s/%s/%s/%s/%s/ %.2f/ %.2f/ %.2f\n", id, name, address, dept, phone, salary, hours, leave);
+		}
+		if((strcmp(id, idDel)) == 0)
+        {
+            flag=1;
+        }
+	}while(!(feof(fp1)));
+	fflush(fp2);
+	fclose(fp1);
+	fclose(fp2);
+	if(flag == 0)
+    {
+        system("cls");
+        printf("Id is not present");
+        sleep(1);
+    }
+    else
+    {
+        remove(EMP_FILE);
+        rename(TMP_FILE, EMP_FILE);
+        system("cls");
+        printf("Done Deleting ");
+        sleep(1);
+        fflush(stdin);
+        system("cls");
+        display();
+
+    }
+}
+
+void delete_user(void)
+{
+    char user_id[10];
+    char user_i[10];
+    char pass[10];
+    char password[10];
+    char reply;
+    char ch[300];
+    int flag=0;
+    system("cls");
+    FILE *fp3;
+    FILE *fp4;
+    fp3 = fopen(USER_FILE, "r");
+    fp4 = fopen(TMP_FILE, "w");
+    printf("Enter User ID to Delete : ");
+    fflush(stdin);
+    gets(user_i);
+    do
+    {
+        fscanf(fp3,"%[^/]%*c%s",user_id,password);
+        fgets(ch, "%[^\n]",fp3);
+        if(feof(fp3))
+        {
+            break;
+        }
+        if((strcmp(user_id, user_i)) != 0)
+        {
+            fprintf(fp4, "%s/%s\n",user_id,password);
+        }
+        if((strcmp(user_id, user_i)) == 0)
+        {
+            flag=1;
+        }
+        }while(!(feof(fp3)));
+        fflush(fp4);
+        fclose(fp3);
+        fclose(fp4);
+        if(flag == 0)
+        {
+            system("cls");
+            printf("Id is not present");
+            sleep(1);
+        }
+        else
+        {
+            remove(USER_FILE);
+            rename(TMP_FILE, USER_FILE);
+            system("cls");
+            printf("Done Deleting ");
+            sleep(1);
+            fflush(stdin);
+            system("cls");
+        }
+}
+
+void edit_employee(void)
+{
+    char address[100],name[50],dept[15];
+    float hours,leave,chours=0.00;
+    char phone[12];
+    char id[10];
+    char idEdit[10];
+    int flag=0;
+    char ch[300];
+    float salary,csalary;
+    FILE *fp1;
+	FILE *fp2;
+	fp1 = fopen(EMP_FILE, "r");
+	fp2 = fopen(TMP_FILE, "w");
+	system("cls");
+	printf("Enter Employee ID to Edit : ");
+	fflush(stdin);
+	gets(idEdit);
+	system("cls");
+	do
+	{
+		fscanf(fp1,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%f%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch,"%[^\n]",fp1);
+		if(feof(fp1))
+		{
+			break;
+		}
+		if((strcmp(id, idEdit)) == 0)
+		{
+		    flag=1;
+		    printf("\n\t\t\t\t\t    Basic Pay");
+            printf("\n\t\t\t\t--------------------------------------\n");
+            printf("\n\t\t\t\t\tTechnician - 15000");
+            printf("\n\t\t\t\t\tSales - 13000");
+            printf("\n\t\t\t\t\tManager - 30000");
+            printf("\n\t\t\t\t\tSweeper - 6000\n\n");
+			printf("Enter new basic salary : ");
+			fflush(stdin);
+			scanf("%f", &csalary);
+			salary = csalary;
+			printf("Enter the number of hours to be worked in a month: ");
+			fflush(stdin);
+			scanf("%f", &chours);
+			hours = chours;
+			sleep(1);
+		}
+		fprintf(fp2, "%s/%s/%s/%s/%s/ %.2f/ %.2f/ %.2f\n", id, name, address, dept, phone, salary, hours, leave);
+	}while(!(feof(fp1)));
+	fflush(fp1);
+	fclose(fp1);
+    fclose(fp2);
+    if(flag==0)
+    {
+        printf("Id not found");
+        sleep(1);
+    }
+    else
+    {
+        remove(EMP_FILE);
+        rename(TMP_FILE, EMP_FILE);
+        system("cls");
+        printf("Done Editing Employee");
+        fflush(stdin);
+        display();
+    }
+}
+
+void print_report(void)
+{
+    char name[50];
+	char address[100];
+	char dept[10];
+	char phone[12];
+	char id[10];
+	char idSearch[10];
+	float leave;
+	float salary,csalary,npresent;
+	float hours,chours;
+	float cleave;
+	float epf;
+	float etf;
+	char val[300];
+	int flag=0;
+	float netSal;
+	float ot, otRate, otHrs,hra,ta,others;
+	int count =0;
+	char ch[300];
+
+    FILE *fp1;
+    FILE *fp2;
+	fp1 = fopen(EMP_FILE, "r");
+	fp2 = fopen(SAL_FILE, "r");
+	system("cls");
+
+	while(!(feof(fp1)) || !(feof(fp2)))
+	{
+		fscanf(fp1,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%*c%f%*c%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch, "%[^\n]",fp1);
+		fscanf(fp2,"%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c",&hra, &ta, &others, &netSal, &cleave, &epf, &etf, &chours,&csalary);
+		fgets(val, "%[^\n]",fp2);
+        count = count + 1;
+	}
+	fclose(fp1);
+	fclose(fp2);
+	fp1 = fopen(EMP_FILE, "r");
+	fp2 = fopen(SAL_FILE, "r");
+	while(count-1>0)
+	{
+            fscanf(fp1,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%*c%f%*c%f",id, name, address, dept, phone, &salary, &hours, &leave);
+            fgets(ch, "%[^\n]",fp1);
+            fscanf(fp2,"%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f",&hra, &ta, &others, &netSal, &cleave, &epf, &etf, &ot, &chours, &csalary);
+            fgets(val, "%[^\n]",fp2);
+
+            printf("\nID: %s\n",id);
+            printf("Name: %s\n", name);
+            printf("Address: %s\n", address);
+            printf("Department: %s\n", dept);
+            printf("Phone: %s\n", phone);
+            printf("Leave: %.2f\n", cleave);
+            printf("\t\tBasic Salary: %.2f\n", salary);
+            printf("\t\tTotal Hours: %.2f\n", chours);
+            printf("\t\tOT Amount: %.2f\n", ot);
+            printf("\t\tEPF: %.2f\n", epf);
+            printf("\t\tETF: %.2f\n", etf);
+            printf("\t\tNet Salary: %.2f\n", netSal);
+            count--;
+	}
+	fclose(fp1);
+	fclose(fp2);
+	printf("\n\nEnter any key to go back>>>");
+	getch();
+}
+
+void print_slip(void)
+{
+	char name[50],dept[10],ch[300],ch1[300];
+	char address[100];
+    char phone[12];
+	char id[10],reply;
+	char empId[10];
+	float salary,csalary;
+	float hours,chours;
+	float leave, cleave;
+	float epf;
+	float etf;
+	int flag=0;
+	float netSal,npresent;
+	float ot, otRate, otHrs,hra,ta,others;
+	hra=7500;
+	ta=3000;
+	others=3500;
+
+	int isExit=0;
+	FILE *fp1;
+	FILE *fp2;
+	FILE *fp3;
+	FILE *fp4;
+	fp1 = fopen(EMP_FILE, "r");
+	fp2 = fopen(SAL_FILE, "r");
+	fp3 = fopen(TMP_FILE,"w");
+	fp4 = fopen(TMP1_FILE,"w");
+	system("cls");
+	printf("Enter Employee ID to print : ");
+	fflush(stdin);
+	gets(empId);
+	do
+	{
+	    system("cls");
+		fscanf(fp1,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c %f%*c %f%*c %f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch,"%[^\n]",fp1);
+		fscanf(fp2,"%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c",&hra, &ta, &others, &netSal, &cleave, &epf, &etf, &ot, &chours, &csalary);
+        fgets(ch1,"%[^\n]",fp2);
+
+		if(feof(fp1))
+        {
+          break;
+        }
+
+		if((strcmp(id, empId)) == 0)
+		{
+		    flag=1;
+            printf("\n\t\t\t\t\t    Basic Allowances");
+            printf("\n\t\t\t\t----------------------------------\n");
+            printf("\n\t\t\t\t\tHRA - %.2f",hra);
+            printf("\n\t\t\t\t\tTA - %.2f",ta);
+            printf("\n\t\t\t\t\tOther Allowances - %.2f",others);
+
+
+        ask: printf("\n\nDo you want to edit the basic allowances : ");
+            reply = getche();
+            if(reply == 'Y' || reply == 'y')
+            {
+                goto edit;
+            }
+            else if(reply == 'N' || reply == 'n')
+            {
+                goto again;
+            }
+            else
+            {
+                printf("\nEnter Y or N !!!!");
+                sleep(1);
+                system("cls");
+                goto ask;
+            }
+
+            system("cls");
+            edit : printf("\n%s - %s",id,name);
+            printf("\nEnter HRA :");
+            scanf("%f",&hra);
+            printf("\nEnter TA : ");
+            scanf("%f",&ta);
+            printf("\nEnter the sum of any other allowances : ");
+            scanf("%f",&others);
+
+            again: printf("\n\nEnter total number of hours worked in a month: ");
+            scanf("%f",&chours);
+            printf("\nLeave for:\nOne day = 1\tHalf day = 0.5\nEnter total sum of number of leave's taken in a month : ");
+            scanf("%f",&cleave);
+            csalary = salary;
+            npresent = (20.00-cleave);
+            leave = cleave;
+            epf = (csalary*14)/100;
+            etf = csalary * ETF_RATE;
+            otHrs = chours - GEN_TIME;
+            otRate = csalary / GEN_TIME;
+            if(otHrs > 0)
+            {
+                ot = otHrs * otRate;
+            }
+            else
+            {
+                ot = 0;
+                otHrs = 0;
+            }
+            netSal = csalary - (epf + etf) + ot+hra+ta+others;
+            system("cls");
+            printf("\n\nID=%10s\nSALARY=%5.2f\nHOURS=%3.2f\nOVERTIME HOURS=%3.2f\nEXTRA PAY=%3.2f\nTOTAL SALARY=%5.2f\nATTENDANCE=%5.2f days", id, csalary, chours, otHrs, ot, netSal, npresent);
+            printf("\n\nDEDUCTIONS\n\t\tPF=%5.2f\n\t\tETF=%5.2f",epf, etf);
+
+            printf("\n\n\t\t\tOVERALL DETAILS");
+            printf("\n\n\t\tName: %s\n", name);
+            printf("\t\tId: %s\n", id);
+            printf("\t\tAddress: %s\n", address);
+            printf("\t\tPhone: %s\n", phone);
+            printf("\t\tBasic Salary: %.2f\n", salary);
+            printf("\t\tTotal Hours: %.2f\n", chours);
+            printf("\t\tOT Hours: %.2f\n", otHrs);
+            printf("\t\tOT Rate: %.2f\n", otRate);
+            printf("\t\tOT Amount: %.2f\n", ot);
+            printf("\t\tEPF: %.2f\n", epf);
+            printf("\t\tETF: %.2f\n", etf);
+            printf("\t\tNet Salary: %.2f\n", netSal);
+            fprintf(fp4, "%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f\n",hra, ta, others, netSal, cleave, epf, etf, ot, chours, csalary);
+            getch();
+		}
+		fprintf(fp3, "%s/%s/%s/%s/%s/%.2f/%.2f /%.2f\n", id, name, address, dept, phone, salary, hours, leave);
+		if((strcmp(id, empId)) != 0)
+        {
+            fprintf(fp4, "%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f/%.2f\n",hra, ta, others, netSal, cleave, epf, etf, ot, chours, csalary);
+        }
+    }while((!(feof(fp1))));
+    fclose(fp1);
+    fflush(fp1);
+    fclose(fp2);
+    fflush(fp2);
+    fclose(fp3);
+    fflush(fp3);
+    fclose(fp4);
+    fflush(fp4);
+    if(flag==0)
+    {
+        printf("ID not present!!!");
+        sleep(2);
+    }
+    else
+    {
+        remove(EMP_FILE);
+        rename(TMP_FILE, EMP_FILE);
+        remove(SAL_FILE);
+        rename(TMP1_FILE, SAL_FILE);
+    }
+}
+
+void print_slipemp(void)
+{
+    char id[10],idSearch[10];
+    char user_id[10],pass[10],password[10];
+    char name[50],dept[10];
+	char address[100];
+	int phone[4];
+	char ch[300],ch1[300],ch2[30];
+	float salary,csalary;
+	float hours,chours;
+	float leave, cleave;
+	float epf;
+	float etf;
+	int flag=0;
+	float netSal,npresent;
+	int isExit=0;
+	float ot, otRate, otHrs,hra = 7500.00,ta=3000.00,others=3500.00;
+
+	FILE *fp;
+	FILE *fp2;
+	FILE *fp3;
+	fp = fopen(EMP_FILE, "r");
+	fp2 = fopen(SAL_FILE, "r");
+	fp3 = fopen(USER_FILE, "r");
+	system("cls");
+	printf("\nEnter your user id : ");
+	fflush(stdin);
+    gets(idSearch);
+
+	do
+	{
+		fscanf(fp, "%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%*c%f%*c%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch,"%[^\n]",fp);
+		fscanf(fp2,"%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f",&hra, &ta, &others, &netSal, &cleave, &epf, &etf, &ot, &chours, &csalary);
+        fgets(ch1,"%[^\n]",fp2);
+
+		fscanf(fp3,"%[^/]%*c%s",user_id,pass);
+		fgets(ch2,"%[^\n]",fp3);
+
+
+		if(feof(fp))
+		{
+			break;
+		}
+        if(strcmp(user_id,idSearch)==0)
+        {
+            flag=1;
+                system("cls");
+                printf("\n\t\t\t\t\t Basic Allowances");
+                printf("\n\t\t\t\t----------------------------------\n");
+                printf("\n\t\t\t\t\t  HRA - %.2f",hra);
+                printf("\n\t\t\t\t\t  TA - %.2f",ta);
+                printf("\n\t\t\t\t\t  ETF - %.2f",etf);
+                printf("\n\t\t\t\t\t  PF - %.2f",epf);
+                printf("\n\t\t\t\tOther Allowances - %.2f",others);
+
+                printf("\n\n\t\tDEDUCTIONS\n\t\tPF=%5.2f\n\t\tETF=%5.2f",epf, etf);
+
+                printf("\n\n\t\t\tOVERALL DETAILS");
+                printf("\n\t\tName: %s\n", name);
+                printf("\t\tId: %s\n", id);
+                printf("\t\tAddress: %s\n", address);
+                printf("\t\tPhone: %s\n", phone);
+                printf("\t\tBasic Salary: %.2f\n", salary);
+                printf("\t\tLeave: %.2f\n", cleave);
+                printf("\t\tTotal Hours: %.2f\n", chours);
+                printf("\t\tOT Amount: %.2f\n", ot);
+                printf("\t\tEPF: %.2f\n", epf);
+                printf("\t\tETF: %.2f\n", etf);
+                printf("\t\tNet Salary: %.2f\n", netSal);
+                getch();
+                isExit = 1;
+
+
+        }
+	}while((!(feof(fp))) || (isExit==1));
+	fclose(fp);
+	fclose(fp3);
+	if(flag == 0)
+    {
+        printf("User id not found!!");
+        sleep(1);
+    }
+}
+
+void search_employee(void)
+{
+	char name[50];
+	char address[100];
+	char dept[15];
+	char phone[12];
+	char id[10];
+	char idSearch[10];
+	float salary;
+	float hours,leave;
+	char ch[300];
+	int isExit=0;
+	int flag=0;
+
+    system("cls");
+    printf("Enter the Employee ID to Search : ");
+	fflush(stdin);
+	gets(idSearch);
+
+	FILE *fp;
+	fp = fopen(EMP_FILE, "r");
+	system("cls");
+
+	do
+	{
+		fscanf(fp,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c %f %f %f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch, "%[^\n]",fp); //can use this line or use %*c in the above fscanf
+		if(strcmp(id,idSearch) == 0)
+        {
+            flag=1;
+			system("cls");
+			printf("ID: %s\n",id);
+			printf("Name: %s\n", name);
+			printf("Address: %s\n", address);
+			printf("Department: %s\n", dept);
+			printf("Phone: %s\n", phone);
+			printf("Salary: %.2f\n\n", salary);
+			isExit=1;
+			printf("Press ENTER to continue >>> ");
+			fflush(stdin);
+			getch();
+
+        }
+        if(feof(fp))
+		{
+			break;
+		}
+    }while((!(feof(fp))));
+    if(flag == 0)
+    {
+        printf("Id not present");
+        sleep(1);
+    }
+	fclose(fp);
+}
+
+void display(void)
+{
+    char name[50];
+	char address[100];
+	char dept[15];
+	char phone[12];
+	char id[10];
+	char idSearch[10];
+	float salary;
+	float hours,leave;
+	int count =0;
+	char ch[300];
+
+    FILE *fp;
+	fp = fopen(EMP_FILE, "r");
+	system("cls");
+
+	while(!(feof(fp)))
+	{
+		fscanf(fp,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%*c%f%*c%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch, "%[^\n]",fp);
+        count = count + 1;
+	}
+	fclose(fp);
+	fp = fopen(EMP_FILE, "r");
+	while(count-1>0)
+	{
+		fscanf(fp,"%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%[^/]%*c%f%*c%f%*c%f",id, name, address, dept, phone, &salary, &hours, &leave);
+		fgets(ch, "%[^\n]",fp);
+		printf("\nID: %s\n",id);
+        printf("Name: %s\n", name);
+		printf("Address: %s\n", address);
+		printf("Department: %s\n", dept);
+		printf("Phone: %s\n", phone);
+		printf("Salary: %.2f\n", salary);
+		count--;
+	}
+	fclose(fp);
+	printf("\n\nEnter any key to go back>>>");
+	getch();
+}
+
+void add_user(void)
+{
+    char user_id[10],u_id[10];
+    char pass[10];
+    int flag=0;
+    char ch[30];
+    char reply;
+    FILE *fp4;
+    fp4 = fopen(USER_FILE, "r");
+    if(fp4 == NULL)
+    {
+        printf("\nError to open the file\n");
+        exit (1);
+    }
+    system("cls");
+    printf("Enter User id: ");
+    fflush(stdin);
+    gets(u_id);
+    do
+    {
+        fscanf(fp4,"%[^/]%*c%s",user_id,pass);
+        fgets(ch,"%[^\n]",fp4);
+        if(strcmp(user_id,u_id) == 0)
+        {
+            flag=1;
+        }
+    }while(!(feof(fp4)));
+    fclose(fp4);
+
+    if(flag==0)
+    {
+        FILE *fp3;
+        fp3 = fopen(USER_FILE, "a+");
+
+        printf("Enter password: ");
+        fflush(stdin);
+        gets(pass);
+        fprintf(fp3, "%s/%s\n", u_id,pass);
+        fflush(fp3);
+        fclose(fp3);
+        system("cls");
+        printf("New records are entered successfully");
+        sleep(2);
+    }
+    if(flag==1)
+    {
+        printf("\nId already exists!!");
+        sleep(1);
+    }
+}
+
+int useremp_check()
+{
+         char user_id[10];
+         char pass[10];
+         char username[10],password[10];
+         int isExit=0;
+         int flag=0;
+         char reply;
+         char ch[300];
+         int check=0,checkp=0;
+         system("cls");
+         FILE *fp3;
+	     fp3 = fopen(USER_FILE, "r");
+         if(fp3 == NULL)
+         {
+            printf("\nError to open the file\n");
+            exit (1);
+         }
+         do
+         {
+             fscanf(fp3,"%[^/]%*c%s",user_id,pass);
+             fgets(ch, "%[^\n]",fp3);
+             again : if(check==0)
+             {
+                system("cls");
+                printf("\nUSERNAME >> ");
+                scanf("%s",username);
+                check =1;
+             }
+             if(strcmp(user_id,username)==0 && (checkp==0))
+             {
+                 printf("\nPASSWORD >> ");
+                 maskPassword(password);
+                 checkp=1;
+                 if(strcmp(user_id,username)!=0 || strcmp(pass,password)!=0)
+                 {
+                    printf("\nUsername or Password is not valid");
+                    flag=1;
+                    ask : printf("\n\n\nTo go back enter 'Y' else enter 'N':");
+                    reply = getche();
+                    if(reply == 'Y' || reply == 'y')
+                    {
+                        flag=1;
+                        isExit=1;
+                    }
+                    else if(reply == 'N' || reply == 'n')
+                    {
+                        check=0;
+                        goto again;
+                    }
+                    else
+                    {
+                        printf("\nEnter Y or N !!!!");
+                        sleep(1);
+                        system("cls");
+                        goto ask;
+                    }
+                }
+                else
+                {
+                    isExit=1;
+                }
+             }
+        }while((!(feof(fp3))) || (isExit=0));
+        fclose(fp3);
+        if((checkp ==0))
+        {
+            printf("Id not found!!");
+            flag=1;
+            sleep(1);
+        }
+        if(flag==1)
+        {
+            return 1;
+        }
+}
+
+void exit_message(void)
+{
+        system("cls");
+        printf("\t\t\t\t\t\tTHANK YOU!\n");
+        printf("\t\t\t\t _______________________________________\n");
+        printf("\t\t\t\t SUBMITTED TO");
+        printf("\t\t SUBMITTED BY\n");
+	    printf("\t\t\t\t Sivaram\t");
+	    printf("\t FANTASTIC4");
+}
+
+int main()
+{
+        int menuOpt;
+        int isExit=0;
+        int choice;
+        int flag=0;
+        int ch;
+
+  wel : welcome_msg();
+        fflush(stdin);
+        scanf("%d",&choice);
+
+        switch(choice)
+        {
+                case 1 :
+                    {
+                        if(user_check())
+                        {
+                            goto wel;
+                        }
+                        break;
+                    }
+                case 2 :
+                    {
+                        if(useremp_check())
+                        {
+                            goto wel;
+                        }
+                        else
+                        {
+                            print_slipemp();
+                            isExit = 1;
+                        }
+                        break;
+                    }
+                default :
+                    {
+                        printf("\nInvalid entry\n");
+                        sleep(1);
+                        goto wel;
+                    }
+        }
+        while(isExit == 0)
+        {
+            menu : main_menu();
+            menuOpt = getche();
+            sleep(1);
+            fflush(stdin);
+            switch(menuOpt)
+                {
+                        case '1':
+                        {
+                                manage_employee();
+                                break;
+                        }
+                        case '2':
+                        {
+                                print_report();
+                                break;
+                        }
+                        case '3':
+                        {
+                                print_slip();
+                                goto menu;
+                                break;
+                        }
+                        case '4':
+                        {
+                            select : system("cls");
+                            printf("\n\t\t\t\t\t  Options");
+                            printf("\n\n\t\t\t\t\t1.Add User");
+                            printf("\n\t\t\t\t\t2.Delete User");
+                            printf("\n\n\nEnter your choice : ");
+                            fflush(stdin);
+                            scanf("%d",&ch);
+                            if(ch == 1)
+                            {
+                                add_user();
+                            }
+                            else if(ch == 2)
+                            {
+                                delete_user();
+                            }
+                            else
+                            {
+                                printf("\nEnter 1 or 2!!");
+                                sleep(1);
+                                goto select;
+                            }
+                                break;
+                        }
+                        case '5':
+                        {
+                                isExit = 1;
+                                break;
+                        }
+                        default:
+                        {
+                                system("cls");
+                                printf("Invalid Option!");
+
+                                fflush(stdin);
+                                sleep(5);
+                                break;
+                        }
+                }
+        }
+        exit_message();
+        fflush(stdin);
+        getch();
+        return (0);
+}
